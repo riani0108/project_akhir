@@ -1,0 +1,343 @@
+/* Register Card */
+.register-container {
+    background: #ffffff;
+    width: 380px;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+    animation: fadeSlide 0.8s ease;
+}
+
+/* Animation */
+@keyframes fadeSlide {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Title */
+.register-container h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #0d47a1;
+}
+
+/* Form group */
+.form-group {
+    margin-bottom: 18px;
+}
+
+/* Input with icon */
+.input-icon {
+    position: relative;
+}
+
+.input-icon i {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    color: #999;
+    transition: 0.3s;
+}
+
+/* Input */
+.input-icon input {
+    width: 100%;
+    padding: 12px 14px 12px 40px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.input-icon input:focus {
+    border-color: #0d47a1;
+    box-shadow: 0 0 0 3px rgba(13, 71, 161, 0.15);
+    outline: none;
+}
+
+.input-icon input:focus + i,
+.input-icon input:focus ~ i {
+    color: #0d47a1;
+}
+
+/* Buttons */
+.btn-register {
+    width: 100%;
+    padding: 12px;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #ff9800, #ffb74d);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+}
+
+.btn-register:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(255, 152, 0, 0.4);
+}
+
+/* Cancel button */
+.btn-cancel {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 25px;
+    background: #f5f5f5;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-cancel:hover {
+    background: #e0e0e0;
+}
+
+/* Messages */
+.success-message {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 13px;
+    text-align: center;
+}
+
+.error-message {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #d32f2f;
+}
+
+/* Login link */
+.login-link {
+    margin-top: 15px;
+    font-size: 13px;
+    text-align: center;
+}
+
+.login-link a {
+    color: #0d47a1;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .register-container {
+        width: 90%;
+        padding: 25px;
+    }
+}
+
+/* =========================
+   GLOBAL
+========================= */
+* {
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* =========================
+   LOGIN CONTAINER
+========================= */
+.container {
+    background: #ffffff;
+    width: 100%;
+    max-width: 420px;
+    padding: 35px 30px;
+    border-radius: 15px;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);
+    animation: slideUp 0.6s ease;
+    position: relative;
+    z-index: 10;
+}
+
+/* =========================
+   TITLE
+========================= */
+.container h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+/* =========================
+   FORM GROUP
+========================= */
+.form-group,
+.from-group {
+    margin-bottom: 20px;
+}
+
+label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    display: block;
+    margin-bottom: 6px;
+}
+
+/* =========================
+   INPUT
+========================= */
+.container input[type="email"],
+.container input[type="password"] {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1.8px solid #e5e7eb;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+input::placeholder {
+    color: #9ca3af;
+}
+
+input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+}
+
+/* =========================
+   BUTTONS
+========================= */
+.btn-login {
+    width: 100%;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.35s ease;
+    margin-top: 5px;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(99, 102, 241, 0.35);
+}
+
+.btn-cancel {
+    width: 100%;
+    margin-top: 12px;
+    padding: 11px;
+    border-radius: 12px;
+    border: 1.8px solid #e5e7eb;
+    background: transparent;
+    color: #374151;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background: #f3f4f6;
+}
+
+/* =========================
+   SUCCESS MESSAGE
+========================= */
+.success-message {
+    background: #ecfdf5;
+    color: #065f46;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 20px;
+    text-align: center;
+    animation: fadeIn 0.5s ease;
+}
+
+/* =========================
+   FORGOT PASSWORD
+========================= */
+.forgot-password-text {
+    text-align: right;
+    margin-top: 12px;
+}
+
+.forgot-password-link {
+    font-size: 13px;
+    color: #6366f1;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.forgot-password-link:hover {
+    color: #4338ca;
+    text-decoration: underline;
+}
+
+/* =========================
+   REGISTER LINK
+========================= */
+.register-text {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 14px;
+    color: #4b5563;
+}
+
+.register-link {
+    color: #6366f1;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.register-link:hover {
+    text-decoration: underline;
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(25px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
