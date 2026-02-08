@@ -11,7 +11,7 @@ RUN apt-get update -y \
     zlib1g-dev \
     libzip-dev \
  && docker-php-ext-configure intl \
- && docker-php-ext-install pdo intl zip
+ && docker-php-ext-install pdo pdo_mysql mysqli intl zip
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
