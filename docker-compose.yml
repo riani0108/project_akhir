@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   app:
-    image: registry.smkn1cibinong.sch.id/new-devops/base-ts:0a3089d8
+    image: registry.smkn1cibinong.sch.id/new-devops/base-ts:4a0b8199
     container_name: base-ts-app
     restart: unless-stopped
 
