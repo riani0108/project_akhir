@@ -19,21 +19,41 @@
     window.PELANGGAN_ID = "{{ auth('pelanggan')->id() }}";
 </script>
 
+<!-- <script src="{{ asset('js/map.js') }}"></script>
+<script src="{{ asset('js/hitung.js') }}"></script> -->
 
 @vite(['resources/js/app.js'])
 
 
+
 <body>
 
-    <div class="btnBlock">
-        <button class="btn-map" onclick=fullScreenView()>View Full Screen</button>
-        <a href="{{ route('input-lokasi.index') }}"
-            class="input-lokasi"
-            id="btn-input-lokasi">
-            Input Lokasi
-        </a>
+    <div class="btnBlock d-flex gap-2">
+        <button class="btn-map" onclick="fullScreenView()">View Full Screen</button>
 
+        <div class="dropdown">
+            <button class="input-lokasi dropdown-toggle"
+                id="inputLokasiDropdown"
+                data-bs-toggle="dropdown"
+                aria-expanded="false">
+                Input Lokasi
+            </button>
+
+            <ul class="dropdown-menu">
+                <li>
+                    <a class="dropdown-item" href="{{ route('data-tower.index') }}">
+                        Data Tower
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{{ route('data-antenna.index') }}">
+                        Data Antenna
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
+
 
     <div id="search-map">
         <div class="search">
@@ -67,20 +87,55 @@
                 <button class="panel-close" onclick="hideAntennaPanel()">✕</button>
             </div>
 
-            <div class="panel-group">
-                <label>Access Point Antenna</label>
-                <select id="ap-antenna">
-                    <option value="sector_90_17">Sector 90° • 17 dBi</option>
-                    <option value="sector_120_15">Sector 120° • 15 dBi</option>
+            <!-- Access Point Antenna (Tower / AP) -->
+            <div class="panel-group mb-4">
+                <label class="form-label fw-bold">Access Point Antenna (di Tower)</label>
+                <select id="ap-antenna" class="form-select">
+                    <option value="" disabled selected>Pilih antena untuk Access Point</option>
+
+                    <option value="sector_90_17" selected>
+                        Sector 90° 17 dBi (5 GHz) – PtMP 10–30 client
+                    </option>
+
+                    <option value="sector_120_16">
+                        Sector 120° 16 dBi (5 GHz) – PtMP area luas
+                    </option>
+
+                    <option value="omni_12">
+                        Omni 12 dBi (5 GHz) – Coverage 360° kecil / hotspot
+                    </option>
+
+                    <option value="grid_27_backhaul">
+                        Grid 27 dBi (5.8 GHz) – Backhaul / PtP jarak jauh
+                    </option>
                 </select>
             </div>
 
-            <div class="panel-group">
-                <label>Client Antenna</label>
-                <select id="client-antenna">
-                    <option value="nanobeam_16">NanoBeam • 16 dBi</option>
-                    <option value="litebeam_23">LiteBeam • 23 dBi</option>
-                    <option value="dish_30">Dish • 30 dBi</option>
+            <!-- Client Antenna (CPE / Pelanggan) -->
+            <div class="panel-group mb-4">
+                <label class="form-label fw-bold">Client Antenna (di lokasi pelanggan)</label>
+                <select id="client-antenna" class="form-select">
+                    <option value="" disabled selected>Pilih antena untuk Client</option>
+
+                    <option value="nanobeam_19" selected>
+                        NanoBeam 19 dBi (5 GHz) – Jarak sedang
+                    </option>
+
+                    <option value="litebeam_23">
+                        LiteBeam AC 23 dBi – Jarak menengah-jauh
+                    </option>
+
+                    <option value="powerbeam_25">
+                        PowerBeam 25 dBi – Jarak jauh & stabil
+                    </option>
+
+                    <option value="grid_24_client">
+                        Grid 24 dBi – Client jarak jauh (hemat biaya)
+                    </option>
+
+                    <option value="dish_30">
+                        Dish / Parabolic 30 dBi – Jarak sangat jauh / backbone
+                    </option>
                 </select>
             </div>
 
@@ -129,7 +184,6 @@
     </div>
 
 
-
     <div class="uisp-page">
         <!-- LEFT COLUMN: FORM & CHART -->
         <div class="left-column">
@@ -167,9 +221,46 @@
                             <input type="number" id="frequency" step="0.1" value="6" min="1" max="80">
                         </div>
 
+                        <!-- ... field sebelumnya tetap ... -->
+
                         <div class="form-group">
                             <label>K-Factor</label>
                             <input type="number" id="kfactor" step="0.01" value="1.33" min="0.5" max="2">
+                        </div>
+
+
+                        <!-- === PILIHAN ANTENA Tx (Transmitter / Tower A) === -->
+                        <div class="form-group mb-4">
+                            <label class="form-label fw-bold">Antena Tx (Tower A / Transmitter)</label>
+                            <select id="antennaTxType" class="form-select">
+                                <option value="" disabled selected>Pilih tipe antena Tx...</option>
+
+                                <!-- ANTENA ACCESS POINT (AP / Tower) -->
+                                <optgroup label="Antena Access Point (Tower)">
+                                    <option value="sector_90_17">Sector 90° 17 dBi</option>
+                                    <option value="sector_120_16">Sector 120° 16 dBi</option>
+                                    <option value="omni_12">Omni 12 dBi</option>
+                                    <option value="grid_27_backhaul">Grid 27 dBi</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <!-- === PILIHAN ANTENA Rx (Receiver / Tower B) === -->
+                        <div class="form-group mb-4">
+                            <label class="form-label fw-bold">Antena Rx (Tower B / Receiver)</label>
+                            <select id="antennaRxType" class="form-select">
+                                <option value="" disabled>Pilih tipe antena Rx...</option>
+
+                                <!-- ANTENA CLIENT -->
+                                <optgroup label="Antena Client (CPE / Pelanggan)">
+                                    <option value="nanobeam_19">NanoBeam 19 dBi</option>
+                                    <option value="litebeam_23">LiteBeam 23 dBi</option>
+                                    <option value="powerbeam_25">PowerBeam 25 dBi</option>
+                                    <option value="dish_30">Dish 30 dBi</option>
+                                    <option value="grid_24_client">Grid 24 dBi</option>
+
+                                </optgroup>
+                            </select>
                         </div>
                     </div>
 
@@ -180,7 +271,6 @@
                     </div>
                 </form>
             </div>
-
 
             <!-- Chart -->
             <div class="uisp-card chart-card">
@@ -207,6 +297,10 @@
                     <div class="legend-item">
                         <span class="legend-color" style="background: #FF4500; border: 1px dashed #FF4500"></span>
                         <span>60% Clearance</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #A0522D"></span>
+                        <span>Earth Bulge</span>
                     </div>
                 </div>
             </div>
@@ -263,74 +357,8 @@
             </div>
 
             <!-- Additional Analysis -->
-            <div class="analysis-container" id="detailedAnalysis" style="display: none;">
-                <div class="analysis-tabs">
-                    <button class="tab-btn active" onclick="showTab('tab-overview')">Overview</button>
-                    <button class="tab-btn" onclick="showTab('tab-critical')">Critical Points</button>
-                    <button class="tab-btn" onclick="showTab('tab-recommendations')">Recommendations</button>
-                </div>
-
-                <div class="tab-content active" id="tab-overview">
-                    <div class="data-grid">
-                        <div class="data-card">
-                            <h5>Tower Information</h5>
-                            <table class="data-table">
-                                <tr>
-                                    <td>Elevation A</td>
-                                    <td id="dataElevA">- m</td>
-                                </tr>
-                                <tr>
-                                    <td>Elevation B</td>
-                                    <td id="dataElevB">- m</td>
-                                </tr>
-                                <tr>
-                                    <td>Total Height A</td>
-                                    <td id="dataHeightA">- m</td>
-                                </tr>
-                                <tr>
-                                    <td>Total Height B</td>
-                                    <td id="dataHeightB">- m</td>
-                                </tr>
-                            </table>
-                        </div>
-
-                        <div class="data-card">
-                            <h5>Link Parameters</h5>
-                            <table class="data-table">
-                                <tr>
-                                    <td>Frequency</td>
-                                    <td id="dataFreq">- GHz</td>
-                                </tr>
-                                <tr>
-                                    <td>K-Factor</td>
-                                    <td id="dataKFactor">-</td>
-                                </tr>
-                                <tr>
-                                    <td>Earth Bulge Max</td>
-                                    <td id="dataBulge">- m</td>
-                                </tr>
-                                <tr>
-                                    <td>Fresnel Radius Max</td>
-                                    <td id="dataFresnel">- m</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tab-content" id="tab-critical">
-                    <div class="critical-points-list" id="criticalList">
-                        <!-- Critical points will be populated here -->
-                    </div>
-                </div>
-
-                <div class="tab-content" id="tab-recommendations">
-                    <div class="recommendations-list" id="recommendationsList">
-                        <!-- Recommendations will be populated here -->
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
+
 
 </body>

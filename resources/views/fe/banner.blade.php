@@ -5,10 +5,10 @@
                 <img src="../front-end/img/tower1.jpg" class="d-block w-100" alt="tower">
             </div>
             <div class="carousel-item">
-                <img src="../img/tower2.jpg" class="d-block w-100" alt="tower2">
+                <img src="../front-end/img/tower2.jpg" class="d-block w-100" alt="tower2">
             </div>
             <div class="carousel-item">
-                <img src="../img/tower3.jpg" class="d-block w-100" alt="tower3">
+                <img src="../front-end/img/tower3.jpg" class="d-block w-100" alt="tower3">
             </div>
         </div>
     </div>

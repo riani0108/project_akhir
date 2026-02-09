@@ -11,6 +11,7 @@ class DataAntenna extends Model
 
     protected $table = 'data_antenna';
     protected $fillable = [
+        'pelanggan_id',
         'jenis_antenna',
         'id_nama_tower',
         'link_tower',
@@ -18,6 +19,11 @@ class DataAntenna extends Model
     ];
 
     // App/Models/DataAntenna.php
+
+    // public function pelanggan()
+    // {
+    //     return $this->belongsTo(Pelanggan::class);
+    // }
 
     public function data_tower_from()
     {
@@ -28,6 +34,4 @@ class DataAntenna extends Model
     {
         return $this->belongsTo(\App\Models\DataTower::class, 'link_tower');
     }
-
- 
 }

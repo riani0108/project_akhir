@@ -1,13 +1,6 @@
 // resources/js/hitung.js - VERSI TERPISAH DENGAN TAMPILAN BARU
 
-//  Layer untuk calculate tampil di map
-let map;
-let towerLayer;
-let linkLayer;
-let heatLayer;
-
 // ============== VARIABEL GLOBAL UNTUK DATA ============== //
-// hitung.js
 let globalTerrainData = null;
 let globalLosData = null;
 let globalFresnelUpper = null;
@@ -19,9 +12,6 @@ let globalFrequency = null;
 let globalTerrainSlope = null;
 let criticalPoints = [];
 let terrainChartInstance = null;
-// let globalTxGain = 23; // default
-// let globalRxGain = 23; // default
-let globalTerrainRaw = null;
 
 // ============== FUNGSI DASAR ============== //
 function getMinMax(...arrays) {
@@ -85,13 +75,13 @@ async function getTerrainProfile(lat1, lon1, lat2, lon2, samples = 60) {
         const res = await fetch(`/elevation?locations=${points.join("|")}`);
         if (!res.ok) throw new Error("Bad response");
         const data = await res.json();
-        console.log("ELEVATION RESPONSE:", data);
         const elevations = data.results.map((r) => r.elevation ?? 0);
 
-        globalTerrainRaw = elevations;
-        return elevations;
+        // Normalize terrain untuk menghindari garis lurus
+        return normalizeTerrain(elevations);
     } catch (e) {
         console.error("Error fetching terrain profile:", e);
+        // Return dummy data untuk testing dengan variasi
         return Array.from(
             { length: samples + 1 },
             (_, i) => 50 + 20 * Math.sin(i / 5) + Math.random() * 10,
@@ -146,6 +136,7 @@ function detectLOSFromTerrain(
 
 // ============== FUNGSI TAMBAHAN ============== //
 
+// 1. FUNGSI SLOPE TANAH
 function calculateSlopePercent(h1, h2, dKm) {
     if (dKm === 0) return 0;
     const dMeter = dKm * 1000;
@@ -230,6 +221,7 @@ function getAverageSlope(slopes) {
     return sum / validSlopes.length;
 }
 
+// 2. ANALISIS TITIK KRITIS
 function analyzeCriticalPoints(
     terrain,
     losData,
@@ -281,6 +273,7 @@ function analyzeCriticalPoints(
     return criticalPoints;
 }
 
+// 3. FUNGSI HITUNG REDAMAN
 function calculateFSPL(distanceKm, frequencyGHz) {
     return 92.45 + 20 * Math.log10(distanceKm) + 20 * Math.log10(frequencyGHz);
 }
@@ -293,7 +286,9 @@ function classifyAttenuation(linkMargin) {
     return { label: "Tidak Layak", status: "bad" };
 }
 
+// 4. FUNGSI POPUP & LOADING
 function showInfoPopup(title, message, type = "info") {
+    // Hapus popup sebelumnya jika ada
     const oldPopup = document.querySelector(".info-popup");
     if (oldPopup) oldPopup.remove();
 
@@ -327,12 +322,16 @@ function showInfoPopup(title, message, type = "info") {
 
     document.body.appendChild(popup);
 
+    // Auto remove setelah 5 detik
     setTimeout(() => {
-        if (popup.parentElement) popup.remove();
+        if (popup.parentElement) {
+            popup.remove();
+        }
     }, 5000);
 }
 
 function showLoading(message = "Memproses data...") {
+    // Hapus loading sebelumnya jika ada
     const oldLoading = document.getElementById("loadingOverlay");
     if (oldLoading) oldLoading.remove();
 
@@ -352,9 +351,12 @@ function showLoading(message = "Memproses data...") {
 
 function hideLoading() {
     const loadingDiv = document.getElementById("loadingOverlay");
-    if (loadingDiv) loadingDiv.remove();
+    if (loadingDiv) {
+        loadingDiv.remove();
+    }
 }
 
+// 5. FUNGSI LOAD SAMPLE DATA
 function loadSampleData() {
     const coord1Input = document.getElementById("coord1");
     const height1Input = document.getElementById("height1");
@@ -377,6 +379,7 @@ function loadSampleData() {
     );
 }
 
+// 6. FUNGSI EXPORT
 function exportAsPDF() {
     showInfoPopup(
         "Export PDF",
@@ -406,7 +409,9 @@ function exportAsCSV() {
         const criticalPoint = criticalPoints.find(
             (p) => Math.abs(p.distance - dist) < 0.01,
         );
-        if (criticalPoint) status = criticalPoint.status;
+        if (criticalPoint) {
+            status = criticalPoint.status;
+        }
 
         csvContent += `${dist.toFixed(2)},${elev.toFixed(1)},${slope.toFixed(1)},${status}\n`;
     }
@@ -460,22 +465,48 @@ function copyToClipboard() {
     });
 }
 
+// 7. FUNGSI TAB SYSTEM
 function switchTab(tabId, button) {
+    // Hide all tabs
     document.querySelectorAll(".tab-content").forEach((tab) => {
         tab.classList.remove("active");
     });
 
+    // Remove active class from all buttons
     document.querySelectorAll(".tab-btn").forEach((btn) => {
         btn.classList.remove("active");
     });
 
-    const targetTab = document.getElementById(`tab-${tabId}`);
-    if (targetTab) targetTab.classList.add("active");
+    // Show selected tab
+    document.getElementById(`tab-${tabId}`).classList.add("active");
 
-    if (button) button.classList.add("active");
+    // Activate corresponding button
+    if (button) {
+        button.classList.add("active");
+    }
 }
 
-// ============== FUNGSI GRAFIK ============== //
+function showTab(tabId) {
+    // Hide all tabs
+    document.querySelectorAll(".tab-content").forEach((tab) => {
+        tab.classList.remove("active");
+    });
+
+    // Remove active class from all buttons
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.classList.remove("active");
+    });
+
+    // Show selected tab
+    document.getElementById(tabId).classList.add("active");
+
+    // Activate corresponding button
+    if (event && event.target) {
+        event.target.classList.add("active");
+    }
+}
+
+// 8. FUNGSI GRAFIK YANG DIPERBAIKI (dari Kode 1)
 function drawTerrainChart(
     terrain,
     heightA,
@@ -504,8 +535,10 @@ function drawTerrainChart(
     const clearanceLine = [];
     const warningLine = [];
 
+    // Hitung slope tanah
     globalTerrainSlope = calculateTerrainSlope(terrain, distanceKm);
 
+    // Simpan data ke global
     globalTerrainData = terrain;
     globalDistanceKm = distanceKm;
     globalFrequency = frequencyGHz;
@@ -577,25 +610,15 @@ function drawTerrainChart(
                     order: 5,
                 },
                 {
-                    label: "Fresnel Zone",
-                    data: fresnelUpper,
-                    borderColor: "#22c55e",
-                    backgroundColor: "rgba(34,197,94,0.2)",
-                    fill: "-1",
+                    label: "Earth Bulge",
+                    data: earthBulge.map((b, i) => terrainOnly[i] + b),
+                    borderColor: "#A0522D",
+                    borderDash: [4, 4],
+                    borderWidth: 2,
                     pointRadius: 0,
-                    order: 3,
+                    fill: false,
+                    order: 8,
                 },
-
-                // {
-                //     label: "Earth Bulge",
-                //     data: earthBulge.map((b, i) => terrainOnly[i] + b),
-                //     borderColor: "#A0522D",
-                //     borderDash: [4, 4],
-                //     borderWidth: 2,
-                //     pointRadius: 0,
-                //     fill: false,
-                //     order: 8,
-                // },
                 {
                     label: "Line of Sight",
                     data: losData,
@@ -605,35 +628,35 @@ function drawTerrainChart(
                     pointRadius: 0,
                     order: 1,
                 },
-                // {
-                //     label: "Fresnel Zone (Upper)",
-                //     data: fresnelUpper,
-                //     borderColor: "#00AA00",
-                //     backgroundColor: "rgba(0, 170, 0, 0.15)",
-                //     borderWidth: 1,
-                //     fill: "+1",
-                //     pointRadius: 0,
-                //     order: 3,
-                // },
-                // {
-                //     label: "Fresnel Zone (Lower)",
-                //     data: fresnelLower,
-                //     borderColor: "#00AA00",
-                //     backgroundColor: "rgba(0, 170, 0, 0.15)",
-                //     borderWidth: 1,
-                //     fill: "-1",
-                //     pointRadius: 0,
-                //     order: 4,
-                // },
-                // {
-                //     label: "Warning Zone (80%)",
-                //     data: warningLine,
-                //     borderColor: "#FFA500",
-                //     borderDash: [3, 3],
-                //     pointRadius: 0,
-                //     borderWidth: 1,
-                //     order: 6,
-                // },
+                {
+                    label: "Fresnel Zone (Upper)",
+                    data: fresnelUpper,
+                    borderColor: "#00AA00",
+                    backgroundColor: "rgba(0, 170, 0, 0.15)",
+                    borderWidth: 1,
+                    fill: "+1",
+                    pointRadius: 0,
+                    order: 3,
+                },
+                {
+                    label: "Fresnel Zone (Lower)",
+                    data: fresnelLower,
+                    borderColor: "#00AA00",
+                    backgroundColor: "rgba(0, 170, 0, 0.15)",
+                    borderWidth: 1,
+                    fill: "-1",
+                    pointRadius: 0,
+                    order: 4,
+                },
+                {
+                    label: "Warning Zone (80%)",
+                    data: warningLine,
+                    borderColor: "#FFA500",
+                    borderDash: [3, 3],
+                    pointRadius: 0,
+                    borderWidth: 1,
+                    order: 6,
+                },
                 {
                     label: "Minimum Clearance (60%)",
                     data: clearanceLine,
@@ -669,17 +692,17 @@ function drawTerrainChart(
                     showLine: false,
                     order: 0,
                 },
-                // {
-                //     label: "Slope Tanah (%)",
-                //     data: globalTerrainSlope,
-                //     yAxisID: "ySlope",
-                //     borderColor: "#1565C0",
-                //     borderWidth: 2,
-                //     borderDash: [4, 4],
-                //     pointRadius: 0,
-                //     fill: false,
-                //     order: 20,
-                // },
+                {
+                    label: "Slope Tanah (%)",
+                    data: globalTerrainSlope,
+                    yAxisID: "ySlope",
+                    borderColor: "#1565C0",
+                    borderWidth: 2,
+                    borderDash: [4, 4],
+                    pointRadius: 0,
+                    fill: false,
+                    order: 20,
+                },
             ],
         },
         options: {
@@ -700,7 +723,7 @@ function drawTerrainChart(
                 legend: {
                     position: "top",
                     labels: {
-                        filter: function (item) {
+                        filter: function (item, chart) {
                             const hideLabels = [
                                 "Fresnel Zone (Lower)",
                                 "Titik Kritis",
@@ -839,27 +862,30 @@ function drawTerrainChart(
     });
 }
 
+// 9. FUNGSI UPDATE QUICK STATS
 function updateQuickStats(distance, status, minClearance, frequency) {
     const quickStats = document.getElementById("quickStats");
-    if (!quickStats) return;
+    if (quickStats) {
+        quickStats.style.display = "flex";
+        document.getElementById("statDistance").textContent =
+            `${distance.toFixed(2)} km`;
+        document.getElementById("statStatus").textContent = status;
+        document
+            .getElementById("statStatus")
+            .setAttribute("data-status", status.toLowerCase());
+        document.getElementById("statClearance").textContent =
+            `${minClearance.toFixed(1)}%`;
+        document.getElementById("statFreq").textContent = `${frequency} GHz`;
+    }
 
-    quickStats.style.display = "flex";
-    document.getElementById("statDistance").textContent =
-        `${distance.toFixed(2)} km`;
-
-    const statusEl = document.getElementById("statStatus");
-    statusEl.textContent = status;
-    statusEl.dataset.status = status.toLowerCase();
-
-    document.getElementById("statClearance").textContent =
-        `${minClearance.toFixed(1)} %`;
-
-    document.getElementById("lastUpdated").textContent =
-        `Update: ${new Date().toLocaleTimeString()}`;
-
-    document.getElementById("statFreq").textContent = `${frequency} GHz`;
+    // Update last updated time
+    const lastUpdated = document.getElementById("lastUpdated");
+    if (lastUpdated) {
+        lastUpdated.textContent = `Terakhir diperbarui: ${new Date().toLocaleTimeString()}`;
+    }
 }
 
+// 10. FUNGSI UPDATE DETAILED ANALYSIS (dari Kode 1)
 function updateOverviewTab(
     ground1,
     ground2,
@@ -871,52 +897,60 @@ function updateOverviewTab(
     kFactor,
     maxBulge,
     maxFresnel,
-    fspl,
-    linkMargin,
-    attenuationClass,
 ) {
     const container = document.querySelector("#tab-overview .data-grid");
-    if (!container) {
-        console.warn("Container .data-grid di tab-overview tidak ditemukan");
-        return;
-    }
+    if (!container) return;
 
     container.innerHTML = `
         <div class="data-card">
-            <h5><i class="fas fa-broadcast-tower"></i> Tower Information</h5>
+            <h5>Tower Information</h5>
             <table class="data-table">
-                <tr><td>Elevasi Tanah Tower A</td><td>${ground1.toFixed(1)} mdpl</td></tr>
-                <tr><td>Elevasi Tanah Tower B</td><td>${ground2.toFixed(1)} mdpl</td></tr>
-                <tr><td>Tower Height A</td><td>${height1} m</td></tr>
-                <tr><td>Tower Height B</td><td>${height2} m</td></tr>
-                <tr class="highlight"><td><strong>Total Height A</strong></td><td><strong>${total1.toFixed(1)} m</strong></td></tr>
-                <tr class="highlight"><td><strong>Total Height B</strong></td><td><strong>${total2.toFixed(1)} m</strong></td></tr>
-                <tr class="highlight">
-                    <td><strong>Link Margin</strong></td>
-                    <td>
-                        <strong class="${getAttenuationColor(linkMargin)}">
-                            ${linkMargin.toFixed(1)} dB
-                        </strong>
-                        (${attenuationClass.label})
-                        <br>
-                        <small class="${getAttenuationColor(linkMargin)}">
-                            ${getAttenuationDescription(linkMargin)}
-                        </small>
-                    </td>
+                <tr>
+                    <td>Elevasi Tanah Tower A</td>
+                    <td>${ground1.toFixed(1)} mdpl</td>
                 </tr>
-                <tr><td>Free Space Path Loss</td><td>${fspl.toFixed(1)} dB</td></tr>
+                <tr>
+                    <td>Elevasi Tanah Tower B</td>
+                    <td>${ground2.toFixed(1)} mdpl</td>
+                </tr>
+                <tr>
+                    <td>Tower Height A</td>
+                    <td>${height1} m</td>
+                </tr>
+                <tr>
+                    <td>Tower Height B</td>
+                    <td>${height2} m</td>
+                </tr>
+                <tr class="highlight">
+                    <td><strong>Total Height A</strong></td>
+                    <td><strong>${total1.toFixed(1)} m</strong></td>
+                </tr>
+                <tr class="highlight">
+                    <td><strong>Total Height B</strong></td>
+                    <td><strong>${total2.toFixed(1)} m</strong></td>
+                </tr>
             </table>
         </div>
         
         <div class="data-card">
-            <h5><i class="fas fa-wifi"></i> Link Parameters</h5>
+            <h5>Link Parameters</h5>
             <table class="data-table">
-                <tr><td>Frequency</td><td>${freq} GHz</td></tr>
-                <tr><td>K-Factor</td><td>${kFactor}</td></tr>
-                <tr><td>Tx Antenna Gain</td><td>${globalTxGain.toFixed(1)} dBi</td></tr>
-                <tr><td>Rx Antenna Gain</td><td>${globalRxGain.toFixed(1)} dBi</td></tr>
-                <tr><td>Max Earth Bulge</td><td>${maxBulge.toFixed(1)} m</td></tr>
-                <tr><td>Max Fresnel Radius</td><td>${maxFresnel.toFixed(1)} m</td></tr>
+                <tr>
+                    <td>Frequency</td>
+                    <td>${freq} GHz</td>
+                </tr>
+                <tr>
+                    <td>K-Factor</td>
+                    <td>${kFactor}</td>
+                </tr>
+                <tr>
+                    <td>Max Earth Bulge</td>
+                    <td>${maxBulge.toFixed(1)} m</td>
+                </tr>
+                <tr>
+                    <td>Max Fresnel Radius</td>
+                    <td>${maxFresnel.toFixed(1)} m</td>
+                </tr>
             </table>
         </div>
     `;
@@ -1018,6 +1052,7 @@ function updateRecommendationsTab(
         });
     }
 
+    // General recommendations
     recommendations.push({
         icon: "fas fa-cloud",
         text: "During heavy rain, signal degradation of 10-20% may occur.",
@@ -1040,21 +1075,7 @@ function updateRecommendationsTab(
     container.innerHTML = items;
 }
 
-function getAttenuationDescription(margin) {
-    if (margin >= 25)
-        return "Sangat stabil, aman untuk hujan lebat & interferensi.";
-    if (margin >= 20) return "Stabil, aman untuk operasional normal.";
-    if (margin >= 15) return "Cukup, masih layak namun perlu monitoring.";
-    if (margin >= 10) return "Kurang baik, rawan drop saat hujan.";
-    return "Tidak layak, link berpotensi sering putus.";
-}
-
-function getAttenuationColor(margin) {
-    if (margin >= 20) return "att-good";
-    if (margin >= 10) return "att-medium";
-    return "att-bad";
-}
-
+// 11. HELPER FUNCTIONS
 function getStatusDescription(
     losStatus,
     criticalCount,
@@ -1134,59 +1155,20 @@ ${
 END OF REPORT`;
 }
 
-// ============== FUNGSI UTAMA ============== //
+// 12. FUNGSI UTAMA YANG DIPERBAIKI
 async function performCalculation() {
     try {
-        showLoading("Memproses data terrain dan link budget...");
-
+        // Show loading state
         const output = document.getElementById("output");
         if (output) {
             output.innerHTML = `
-                <div class="results-tabs">
-                    <div class="tab-buttons">
-                        <button class="tab-btn active" data-tab="overview">Overview</button>
-                        <button class="tab-btn" data-tab="critical">Critical Points</button>
-                        <button class="tab-btn" data-tab="recommendations">Recommendations</button>
-                        <button class="tab-btn" data-tab="export">Export</button>
-                    </div>
-
-                    <div class="tab-content active" id="tab-overview">
-                        <div class="data-grid"></div>
-                    </div>
-
-                    <div class="tab-content" id="tab-critical">
-                        <div class="critical-points-list" id="criticalList"></div>
-                    </div>
-
-                    <div class="tab-content" id="tab-recommendations">
-                        <div class="recommendations-list" id="recommendationsList"></div>
-                    </div>
-
-                    <div class="tab-content" id="tab-export">
-                        <div class="export-options">
-                            <h4>Export Results</h4>
-                            <div class="export-buttons">
-                                <button class="export-btn" onclick="exportAsPDF()">
-                                    <i class="fas fa-file-pdf"></i> PDF Report
-                                </button>
-                                <button class="export-btn" onclick="exportAsCSV()">
-                                    <i class="fas fa-file-csv"></i> CSV Data
-                                </button>
-                                <button class="export-btn" onclick="copyToClipboard()">
-                                    <i class="fas fa-copy"></i> Copy Summary
-                                </button>
-                            </div>
-                            <div style="margin-top: 20px; padding: 16px; background: #f8f9fa; border-radius: 8px;">
-                                <p style="font-size: 14px; color: #666; margin-bottom: 8px;">Data preview:</p>
-                                <pre id="exportPreview" style="background: white; padding: 12px; border-radius: 6px; font-size: 12px; max-height: 150px; overflow: auto;">Menunggu hasil perhitungan...</pre>
-                            </div>
-                        </div>
-                    </div>
+                <div class="loading-compact">
+                    <div class="spinner-compact"></div>
+                    <p>Calculating LOS and analyzing terrain...</p>
                 </div>
             `;
         }
 
-        // Ambil input
         const coord1Input =
             document.getElementById("coord1")?.value.trim() || "";
         const coord2Input =
@@ -1198,7 +1180,6 @@ async function performCalculation() {
                 "Masukkan koordinat untuk kedua tower!",
                 "error",
             );
-            hideLoading();
             return;
         }
 
@@ -1214,7 +1195,6 @@ async function performCalculation() {
                 "Format koordinat tidak valid! Gunakan: latitude,longitude",
                 "error",
             );
-            hideLoading();
             return;
         }
 
@@ -1227,7 +1207,7 @@ async function performCalculation() {
         const kFactor =
             parseFloat(document.getElementById("kfactor")?.value) || 1.33;
 
-        // Ambil elevasi
+        // Ambil elevasi tanah
         const [ground1, ground2] = await Promise.all([
             getElevation(lat1, lon1),
             getElevation(lat2, lon2),
@@ -1237,87 +1217,8 @@ async function performCalculation() {
         const totalHeight2 = ground2 + height2;
         const distance = haversineDistance(lat1, lon1, lat2, lon2);
 
+        // Ambil terrain profile
         const terrain = await getTerrainProfile(lat1, lon1, lat2, lon2, 100);
-
-        // ================= LINK BUDGET =================
-        const txPower = 20;
-        const cableLoss = 2;
-        const rxSensitivity = -75;
-
-        let txGain = 23;
-
-        const txType =
-            document.getElementById("antennaTxType")?.value || "sector_90_17";
-
-        switch (txType) {
-            case "sector_90_17":
-                txGain = 17;
-                break;
-            case "sector_120_16":
-                txGain = 16;
-                break;
-            case "omni_12":
-                txGain = 12;
-                break;
-            case "grid_27_backhaul":
-                txGain = 27;
-                break;
-            case "custom":
-                txGain =
-                    parseFloat(
-                        document.getElementById("customTxGain")?.value,
-                    ) || 23;
-                break;
-        }
-
-        let rxGain = 0;
-
-        const rxType = document.getElementById("antennaRxType")?.value;
-
-        if (!rxType) {
-            showInfoPopup("Error", "Pilih antena Rx terlebih dahulu!", "error");
-            hideLoading();
-            return;
-        }
-
-        // if (rxType !== "same-as-tx") {
-        //     switch (rxType) {
-        //         case "nanobeam_19":
-        //             rxGain = 19;
-        //             break;
-        //         case "litebeam_23":
-        //             rxGain = 23;
-        //             break;
-        //         case "powerbeam_25":
-        //             rxGain = 25;
-        //             break;
-        //         case "dish_30":
-        //             rxGain = 30;
-        //             break;
-        //         case "grid_24_client":
-        //             rxGain = 24;
-        //             break;
-        //         case "custom":
-        //             rxGain =
-        //                 parseFloat(
-        //                     document.getElementById("customRxGain")?.value,
-        //                 ) || 23;
-        //             break;
-        //         default:
-        //             rxGain = txGain;
-        //     }
-        // }
-
-        txGain = Math.max(10, txGain);
-        rxGain = Math.max(10, rxGain);
-
-        window.globalTxGain = txGain;
-        window.globalRxGain = rxGain;
-
-        const fspl = calculateFSPL(distance, frequency);
-        const receivedPower = txPower + txGain + rxGain - fspl - cableLoss;
-        const linkMargin = receivedPower - rxSensitivity;
-        const attenuationClass = classifyAttenuation(linkMargin);
 
         // Gambar chart
         drawTerrainChart(
@@ -1329,27 +1230,35 @@ async function performCalculation() {
             kFactor,
         );
 
-        // Analisis critical points
+        // Hitung analysis data
         let minClearance = Infinity;
+        let maxClearance = -Infinity;
+        let maxBulge = 0;
+        let maxFresnel = 0;
         let criticalCount = 0;
         let warningCount = 0;
 
         criticalPoints.forEach((point) => {
             if (point.status === "BLOCKED") criticalCount++;
             if (point.status === "WARNING") warningCount++;
+
             if (point.clearancePercent < minClearance)
                 minClearance = point.clearancePercent;
+            if (point.clearancePercent > maxClearance)
+                maxClearance = point.clearancePercent;
         });
 
-        let maxBulge = 0;
+        // Calculate max earth bulge
         if (globalEarthBulge && globalTerrainOnly) {
-            maxBulge = Math.max(...globalEarthBulge);
+            maxBulge = Math.max(...globalEarthBulge.map((bulge, i) => bulge));
         }
 
-        let maxFresnel = 0;
+        // Calculate max fresnel radius
         if (globalFresnelUpper && globalLosData) {
             maxFresnel = Math.max(
-                ...globalFresnelUpper.map((f, i) => f - globalLosData[i]),
+                ...globalFresnelUpper.map(
+                    (fresnel, i) => fresnel - globalLosData[i],
+                ),
             );
         }
 
@@ -1360,9 +1269,10 @@ async function performCalculation() {
                   ? "MARGINAL"
                   : "CLEAR";
 
-        // Update UI
+        // Update quick stats
         updateQuickStats(distance, losStatus, minClearance, frequency);
 
+        // Update detailed analysis tabs
         updateOverviewTab(
             ground1,
             ground2,
@@ -1374,11 +1284,7 @@ async function performCalculation() {
             kFactor,
             maxBulge,
             maxFresnel,
-            fspl,
-            linkMargin,
-            attenuationClass,
         );
-
         updateCriticalPointsTab();
         updateRecommendationsTab(
             losStatus,
@@ -1390,49 +1296,183 @@ async function performCalculation() {
             distance,
         );
 
-        // ================= MAP RENDER =================
-        if (typeof renderLinkOnMap === "function") {
-            renderLinkOnMap(
-                lat1,
-                lon1,
-                lat2,
-                lon2,
-                distance,
-                losStatus,
-                totalHeight1,
-                totalHeight2,
-            );
-        }
-
-        const preview = document.getElementById("exportPreview");
-        if (preview) {
-            preview.textContent = generateExportText(
-                lat1,
-                lon1,
-                lat2,
-                lon2,
-                ground1,
-                ground2,
-                height1,
-                height2,
-                totalHeight1,
-                totalHeight2,
-                distance,
-                frequency,
-                kFactor,
-                losStatus,
-                minClearance,
-                criticalCount,
-                warningCount,
-            );
-        }
-
+        // Show analysis container
         const analysisContainer = document.getElementById("detailedAnalysis");
         if (analysisContainer) {
             analysisContainer.style.display = "block";
         }
 
-        hideLoading();
+        // Update results content dengan tab system
+        if (output) {
+            output.innerHTML = `
+                <div class="results-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="summary">Summary</button>
+                        <button class="tab-btn" data-tab="details">Details</button>
+                        <button class="tab-btn" data-tab="export">Export</button>
+                    </div>
+                    
+                    <div class="tab-content active" id="tab-summary">
+                        <div class="summary-status ${losStatus.toLowerCase()}">
+                            <div class="status-icon">
+                                ${
+                                    losStatus === "CLEAR"
+                                        ? '<i class="fas fa-check-circle"></i>'
+                                        : losStatus === "MARGINAL"
+                                          ? '<i class="fas fa-exclamation-triangle"></i>'
+                                          : '<i class="fas fa-times-circle"></i>'
+                                }
+                            </div>
+                            <div class="status-content">
+                                <h3>${
+                                    losStatus === "CLEAR"
+                                        ? "Link is Clear"
+                                        : losStatus === "MARGINAL"
+                                          ? "Link is Marginal"
+                                          : "Link is Blocked"
+                                }</h3>
+                                <p>${getStatusDescription(losStatus, criticalCount, warningCount, minClearance)}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-stats">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-ruler-combined"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value">${distance.toFixed(2)} km</div>
+                                    <div class="stat-label">Distance</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value">${minClearance.toFixed(1)}%</div>
+                                    <div class="stat-label">Min Clearance</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-tower-broadcast"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value">${totalHeight1.toFixed(0)} / ${totalHeight2.toFixed(0)} m</div>
+                                    <div class="stat-label">Tower Heights</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-wave-square"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value">${frequency} GHz</div>
+                                    <div class="stat-label">Frequency</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="tab-details">
+                        <div class="details-grid">
+                            <div class="details-card">
+                                <h4><i class="fas fa-mountain"></i> Elevation Data</h4>
+                                <table class="details-table">
+                                    <tr>
+                                        <td>Tower A Elevation</td>
+                                        <td>${ground1.toFixed(1)} m</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tower B Elevation</td>
+                                        <td>${ground2.toFixed(1)} m</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tower A Height</td>
+                                        <td>${height1} m</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tower B Height</td>
+                                        <td>${height2} m</td>
+                                    </tr>
+                                    <tr class="highlight">
+                                        <td><strong>Total Height A</strong></td>
+                                        <td><strong>${totalHeight1.toFixed(1)} m</strong></td>
+                                    </tr>
+                                    <tr class="highlight">
+                                        <td><strong>Total Height B</strong></td>
+                                        <td><strong>${totalHeight2.toFixed(1)} m</strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            
+                            <div class="details-card">
+                                <h4><i class="fas fa-cogs"></i> Link Parameters</h4>
+                                <table class="details-table">
+                                    <tr>
+                                        <td>Distance</td>
+                                        <td>${distance.toFixed(2)} km</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Frequency</td>
+                                        <td>${frequency} GHz</td>
+                                    </tr>
+                                    <tr>
+                                        <td>K-Factor</td>
+                                        <td>${kFactor}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Max Earth Bulge</td>
+                                        <td>${maxBulge.toFixed(1)} m</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Max Fresnel Radius</td>
+                                        <td>${maxFresnel.toFixed(1)} m</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Terrain Samples</td>
+                                        <td>${terrain.length} points</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="tab-export">
+                        <div class="export-options">
+                            <h4>Export Results</h4>
+                            <div class="export-buttons">
+                                <button class="export-btn" onclick="exportAsPDF()">
+                                    <i class="fas fa-file-pdf"></i> PDF Report
+                                </button>
+                                <button class="export-btn" onclick="exportAsCSV()">
+                                    <i class="fas fa-file-csv"></i> CSV Data
+                                </button>
+                                <button class="export-btn" onclick="copyToClipboard()">
+                                    <i class="fas fa-copy"></i> Copy Summary
+                                </button>
+                            </div>
+                            <div class="export-preview">
+                                <pre id="exportPreview">${generateExportText(lat1, lon1, lat2, lon2, ground1, ground2, height1, height2, totalHeight1, totalHeight2, distance, frequency, kFactor, losStatus, minClearance, criticalCount, warningCount)}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Add event listeners for tabs
+            document.querySelectorAll(".tab-btn").forEach((btn) => {
+                btn.addEventListener("click", function () {
+                    const tabId = this.getAttribute("data-tab");
+                    switchTab(tabId, this);
+                });
+            });
+        }
+
         showInfoPopup(
             "Analisis Selesai",
             "Perhitungan LOS dan analisis terrain telah selesai.",
@@ -1440,7 +1480,6 @@ async function performCalculation() {
         );
     } catch (error) {
         console.error("Error in calculation:", error);
-        hideLoading();
         showInfoPopup("Error", `Terjadi kesalahan: ${error.message}`, "error");
 
         const output = document.getElementById("output");
@@ -1449,7 +1488,7 @@ async function performCalculation() {
                 <div class="error">
                     <i class="fas fa-exclamation-circle"></i>
                     <h4>Error</h4>
-                    <p>${error.message}</p>
+                    <p>An error occurred: ${error.message}</p>
                     <p>Please check your input and try again.</p>
                 </div>
             `;
@@ -1457,8 +1496,9 @@ async function performCalculation() {
     }
 }
 
-// ============== INISIALISASI ==============
+// 13. INISIALISASI
 document.addEventListener("DOMContentLoaded", function () {
+    // Add sample data button
     const form = document.getElementById("calcForm");
     if (form) {
         const sampleBtn = document.createElement("button");
@@ -1466,43 +1506,25 @@ document.addEventListener("DOMContentLoaded", function () {
         sampleBtn.className = "btn-sample";
         sampleBtn.innerHTML = '<i class="fas fa-vial"></i> Load Sample Data';
         sampleBtn.onclick = loadSampleData;
+
         const actionDiv = form.querySelector(".uisp-action");
-        if (actionDiv) actionDiv.appendChild(sampleBtn);
+        if (actionDiv) {
+            actionDiv.appendChild(sampleBtn);
+        }
     }
 
+    // Initialize last updated time
     const lastUpdated = document.getElementById("lastUpdated");
     if (lastUpdated) {
         lastUpdated.textContent = `Siap untuk kalkulasi`;
     }
-
-    // Kontrol custom gain antena
-    const antennaTxSelect = document.getElementById("antennaTxType");
-    const antennaRxSelect = document.getElementById("antennaRxType");
-    const customTxSection = document.getElementById("customTxGainSection");
-    const customRxSection = document.getElementById("customRxGainSection");
-
-    if (antennaTxSelect && customTxSection) {
-        antennaTxSelect.addEventListener("change", function () {
-            customTxSection.style.display =
-                this.value === "custom" ? "block" : "none";
-        });
-    }
-
-    if (antennaRxSelect && customRxSection) {
-        antennaRxSelect.addEventListener("change", function () {
-            customRxSection.style.display =
-                this.value === "custom" ? "block" : "none";
-        });
-    }
 });
 
-// Export ke window
+// Export fungsi ke window
 window.performCalculation = performCalculation;
 window.loadSampleData = loadSampleData;
 window.exportAsPDF = exportAsPDF;
 window.exportAsCSV = exportAsCSV;
 window.copyToClipboard = copyToClipboard;
 window.switchTab = switchTab;
-window.criticalPoints = [];
-window.globalTxGain = 23;
-window.globalRxGain = 23;
+window.showTab = showTab;

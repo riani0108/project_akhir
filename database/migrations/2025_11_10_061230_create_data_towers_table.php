@@ -14,6 +14,9 @@ return new class extends Migration
     {
         Schema::create('data_tower', function (Blueprint $table) {
             $table->id();
+            // $table->foreignId('nama_pelanggan_id')
+            //     ->constrained('pelanggan')
+            //     ->cascadeOnDelete();
             $table->string('nama_tower', 50);
             $table->string('alamat_tower')->nullable();
             $table->integer('tinggi_tower'); // in meters

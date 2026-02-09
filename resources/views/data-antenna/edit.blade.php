@@ -23,15 +23,84 @@
                                 @csrf
                                 @method('PUT')
 
+                                @php
+                                $selectedAntenna = old('jenis_antenna', $data->jenis_antenna);
+                                @endphp
+
                                 {{-- Jenis Antenna --}}
-                                <div class="form-group">
+                                <div class="form-group mb-3">
                                     <label class="form-label">Jenis Antenna</label>
-                                    <input class="form-control"
-                                        type="text"
-                                        name="jenis_antenna"
-                                        value="{{ old('jenis_antenna', $data->jenis_antenna) }}"
-                                        required>
+                                    <select class="form-control" name="jenis_antenna" id="jenis_antenna" required>
+                                        <option value="{{ old('jenis_antenna', $data->id) }}">Pilih Jenis Antenna</option>
+                                        <option value=" Grid 24 dBi 2.4 GHz"
+                                            data-frekuensi="2.4"
+                                            data-gain="24"
+                                            data-polaritas="Horizontal atau Vertical"
+                                            {{ $selectedAntenna == 'Grid 24 dBi 2.4 GHz' ? 'selected' : '' }}>
+                                            Grid 24 dBi (2.4 GHz)
+                                        </option>
+
+                                        <option value="Yagi 15 dBi 2.4 GHz"
+                                            data-frekuensi="2.4"
+                                            data-gain="15"
+                                            data-polaritas="Horizontal atau Vertical"
+                                            {{ $selectedAntenna == 'Yagi 15 dBi 2.4 GHz' ? 'selected' : '' }}>
+                                            Yagi 15 dBi (2.4 GHz)
+                                        </option>
+
+                                        <option value="Grid 24 dBi 5.8 GHz"
+                                            data-frekuensi="5.8"
+                                            data-gain="24"
+                                            data-polaritas="Horizontal atau Vertical"
+                                            {{ $selectedAntenna == 'Grid 24 dBi 5.8 GHz' ? 'selected' : '' }}>
+                                            Grid 24 dBi (5.8 GHz)
+                                        </option>
+
+                                        <option value="LiteBeam M5-23"
+                                            data-frekuensi="5"
+                                            data-gain="23"
+                                            data-polaritas="Vertical"
+                                            {{ $selectedAntenna == 'LiteBeam M5-23' ? 'selected' : '' }}>
+                                            Ubiquiti LiteBeam M5-23 (5 GHz)
+                                        </option>
+
+                                        <option value="NanoBeam 5AC 19 dBi"
+                                            data-frekuensi="5"
+                                            data-gain="19"
+                                            data-polaritas="Dual (Slant ±45°)"
+                                            {{ $selectedAntenna == 'NanoBeam 5AC 19 dBi' ? 'selected' : '' }}>
+                                            Ubiquiti NanoBeam 5AC Gen2 19 dBi
+                                        </option>
+
+                                        <option value="PowerBeam 5AC 25 dBi"
+                                            data-frekuensi="5"
+                                            data-gain="25"
+                                            data-polaritas="Dual (Slant ±45°)"
+                                            {{ $selectedAntenna == 'PowerBeam 5AC 25 dBi' ? 'selected' : '' }}>
+                                            Ubiquiti PowerBeam 5AC 25 dBi
+                                        </option>
+                                    </select>
                                 </div>
+
+                                {{-- Auto Info --}}
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Frekuensi (GHz)</label>
+                                        <input type="text" id="frekuensi" class="form-control" readonly>
+                                    </div>
+
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Gain (dBi)</label>
+                                        <input type="text" id="gain" class="form-control" readonly>
+                                    </div>
+
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Polaritas</label>
+                                        <input type="text" id="polaritas" class="form-control" readonly>
+                                    </div>
+                                </div>
+
+
 
                                 {{-- Pilih Tower --}}
                                 <div class="form-group mt-3">
@@ -88,6 +157,27 @@
                             document.getElementById('longitude').value = selected.dataset.lng ?? '';
                         });
                     </script> -->
+
+
+                    {{-- SCRIPT AUTO LOAD --}}
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const select = document.getElementById('jenis_antenna');
+
+                            function updateInfo() {
+                                const option = select.options[select.selectedIndex];
+                                if (!option) return;
+
+                                document.getElementById('frekuensi').value = option.dataset.frekuensi || '';
+                                document.getElementById('gain').value = option.dataset.gain || '';
+                                document.getElementById('polaritas').value = option.dataset.polaritas || '';
+                            }
+
+                            select.addEventListener('change', updateInfo);
+                            updateInfo(); // 🔥 load data lama
+                        });
+                    </script>
+
 
 
                     @if(session('error'))

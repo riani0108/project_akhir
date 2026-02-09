@@ -1,10 +1,8 @@
 <div class="sidebar p-3" id="sidebar" style="width: 250px; transition: all 0.3s;">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="m-0">
-            <a href="{{ route('admin.index') }}"
-                class="text-decoration-none" style="color: #104c91;">
-                <i class="fas fa-broadcast-tower me-2"></i>P2P
-            </a>
+            <a href="#" class="text-decoration-none" style="color: #104c91;">
+            <i class="fas fa-broadcast-tower me-2"></i>P2P
         </h3>
         <button class="btn d-lg-none" id="sidebarClose" style="color: #104c91;">
             <i class="fas fa-times"></i>
@@ -12,12 +10,6 @@
     </div>
 
     <ul class="nav flex-column">
-        <li>
-            <a href="{{ route('admin.index') }}"
-                class="nav-link {{ request()->routeIs('admin.index') ? 'active bg-#f0ae88' : '' }}">
-                <i class="fas fa-home me-2"></i>Admin Dashboard
-            </a>
-        </li>
 
         <li>
             <a href="{{ route('data-tower.index') }}"
@@ -33,12 +25,12 @@
             </a>
         </li>
 
-        <li>
+        <!-- <li>
             <a href="{{ route('peta-sebaran.index') }}"
                 class="nav-link {{ request()->routeIs('peta-sebaran.index') ? 'active bg-#f0ae88' : '' }}">
                 <i class="fas fa-map me-2"></i>Peta Sebaran
             </a>
-        </li>
+        </li> -->
     </ul>
 </div>
 

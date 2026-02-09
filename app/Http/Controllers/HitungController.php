@@ -17,6 +17,7 @@ class HitungController extends Controller
             ->get();
 
         return view('hitung.index', [
+            'pelangganId' => auth('pelanggan')->id(),
             'title'   => 'Hitung',
             'menu'    => 'hitung',
             'project' => $project

@@ -140,4 +140,6 @@ class DataTowerController extends Controller
     {
         return DataTower::all();
     }
+
+    
 }

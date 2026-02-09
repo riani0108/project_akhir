@@ -28,10 +28,9 @@ class VerifiedPelanggan
         }
 
         // Cek apakah email sudah diverifikasi
-        if (!$user->hasVerifiedEmail()) {
-            // Jika belum diverifikasi, redirect ke halaman notice
+        if (!$user->email_verified_at) {
             return redirect()->route('verification.notice')
-                ->with('warning', 'Silakan verifikasi email Anda terlebih dahulu.');
+                ->with('error', 'Silakan verifikasi email Anda terlebih dahulu.');
         }
 
         return $next($request);

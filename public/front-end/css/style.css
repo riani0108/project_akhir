@@ -429,90 +429,224 @@ body {
 
 /* ======= END MAIN CONTENT INDEX DATA TOWER ========== */
 
-/* ========== Informtion Section ========== */
-
+/* =========Informasi========= */
 /* BACKGROUND */
 .p2p-bg {
-    background-color: #fff;
-    color: #104c91;
+    background: radial-gradient(
+        circle at top left,
+        #8f94fb 0%,
+        #4e54c8 35%,
+        #2b1055 100%
+    );
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
 }
-
-/* SEARCH */
-.p2p-search {
-    background-color: #ffffff;
-    color: #104c91;
-    border: 2px solid #efc9af;
+.p2p-bg::before {
+    content: "";
+    position: absolute;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.12),
+        transparent 70%
+    );
+    top: -80px;
+    right: -60px;
+    filter: blur(2px);
+    opacity: 0.8;
 }
-
-.p2p-search::placeholder {
-    color: #104c91;
+.p2p-bg::after {
+    content: "";
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.18), transparent 70%);
+    bottom: -60px;
+    left: -40px;
+    filter: blur(2px);
     opacity: 0.7;
 }
-
-/* SECTION BACKGROUND */
-.bts-section {
-    background-color: #104c91;
-    border-radius: 15px;
+#information-section .container {
+    position: relative;
+    z-index: 2;
 }
 
-/* JUDUL */
-.bts-title {
-    color: #efc9af;
-    font-size: 32px;
+.tower-hero-card {
+    max-height: 320px;
+    border-radius: 24px;
+}
+.tower-hero-card img {
+    filter: brightness(1.05) contrast(1.05);
+    transform: scale(1.03);
+    transition:
+        transform 0.6s ease,
+        filter 0.6s ease;
+}
+.tower-hero-card:hover img {
+    transform: scale(1.08);
+    filter: brightness(1.15) contrast(1.08);
 }
 
-/* PARAGRAF */
-.bts-section p {
-    font-size: 15px;
-    line-height: 1.8;
-    opacity: 0.95;
-}
-
-.bts-image {
-    border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-    max-height: 420px;
-    object-fit: cover;
-}
-
-@media (max-width: 768px) {
-    .bts-banner {
-        flex-direction: column;
-    }
-    .bts-image {
-        margin: 20px 0 0;
-        width: 100%;
-    }
-}
-
-#infoList {
-    margin-top: 30px;
-}
-/* CARD */
 .p2p-card {
-    background: #104c91;
-    border-left: 5px solid #efc9af;
-    padding: 22px;
+    position: relative;
+    background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.08),
+        rgba(148, 163, 184, 0.08)
+    );
+    border-radius: 20px;
+    padding: 22px 20px;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.45),
+        0 0 0 1px rgba(15, 23, 42, 0.15);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    cursor: pointer;
     height: 100%;
-    border-radius: 14px;
-    transition: 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease,
+        background 0.25s ease;
 }
 
-.p2p-card h4 {
-    color: #efc9af;
-    margin-bottom: 10px;
-}
-
-.p2p-card p {
-    color: #fff;
-    opacity: 0.9;
+.p2p-card::before {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(96, 165, 250, 0.18),
+            transparent 60%
+        ),
+        radial-gradient(
+            circle at bottom right,
+            rgba(192, 132, 252, 0.18),
+            transparent 65%
+        );
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
 }
 
 .p2p-card:hover {
-    background: #022042;
-    transform: translateY(-4px);
+    transform: translateY(-8px) translateZ(0);
+    box-shadow:
+        0 26px 60px rgba(15, 23, 42, 0.7),
+        0 0 0 1px rgba(129, 140, 248, 0.5);
+    border-color: rgba(129, 140, 248, 0.8);
+    background: linear-gradient(
+        145deg,
+        rgba(15, 23, 42, 0.6),
+        rgba(30, 64, 175, 0.85)
+    );
 }
-/* ========== End Informtion Section ========== */
+
+.p2p-card:hover::before {
+    opacity: 1;
+}
+
+.p2p-card h4 {
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #f9fafb;
+}
+
+.p2p-card p {
+    color: #e5e7eb;
+    margin-bottom: 14px;
+    font-size: 0.95rem;
+}
+
+.p2p-card small {
+    color: #bfdbfe !important;
+}
+
+/* icon lingkaran glow */
+.card-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    background: radial-gradient(circle at 30% 0%, #e0f2fe, #1d4ed8);
+    box-shadow:
+        0 10px 30px rgba(37, 99, 235, 0.65),
+        0 0 0 1px rgba(191, 219, 254, 0.5);
+    color: #eff6ff;
+    font-size: 1.6rem;
+}
+
+.p2p-card .badge {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    font-size: 0.75rem;
+    background: rgba(15, 23, 42, 0.85);
+    color: #e5e7eb;
+    border-radius: 999px;
+    padding: 4px 10px;
+    border: 1px solid rgba(148, 163, 184, 0.8);
+    backdrop-filter: blur(10px);
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: rgba(15, 23, 42, 0.55);
+    border-radius: 999px;
+    width: 42px;
+    height: 42px;
+    background-size: 60% 60%;
+}
+#infoCarousel .carousel-control-prev,
+#infoCarousel .carousel-control-next {
+    width: 6%;
+}
+
+/* dot indicators */
+#infoCarousel .carousel-indicators [data-bs-target] {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background-color: rgba(191, 219, 254, 0.7);
+}
+#infoCarousel .carousel-indicators .active {
+    background-color: #ffffff;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 0;
+}
+
+.form-control:focus {
+    border-color: #93c5fd;
+    box-shadow: 0 0 0 0.2rem rgba(147, 197, 253, 0.35);
+}
+
+@media (max-width: 767.98px) {
+    .tower-hero-card {
+        max-height: 260px;
+    }
+    .p2p-card {
+        padding: 18px 16px;
+        box-shadow:
+            0 14px 30px rgba(15, 23, 42, 0.55),
+            0 0 0 1px rgba(15, 23, 42, 0.2);
+    }
+}
+
+/* ===========Informsi end=============== */
 
 /* ========== HITUNG DATA TOWER ========== */
 .btnBlock {
@@ -1706,6 +1840,25 @@ leaflet-top .leaflet-control {
         flex: 0 0 calc(50% - 10px);
     }
 }
+
+/* =============================
+   LINK MARGIN COLORS
+   ============================= */
+.att-good {
+    color: #1e7e34; /* hijau */
+    font-weight: 600;
+}
+
+.att-medium {
+    color: #f0ad4e; /* kuning */
+    font-weight: 600;
+}
+
+.att-bad {
+    color: #c82333; /* merah */
+    font-weight: 600;
+}
+
 /* ========== END HITUNG DATA TOWER ========== */
 
 .tower-popup {
@@ -2072,4 +2225,30 @@ leaflet-top .leaflet-control {
         transform: translateX(0);
         opacity: 1;
     }
+}
+
+.map-legend {
+    background: white;
+    padding: 8px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.legend-box {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 6px;
+    border-radius: 2px;
+}
+
+.legend-box.clear {
+    background: green;
+}
+.legend-box.marginal {
+    background: orange;
+}
+.legend-box.blocked {
+    background: red;
 }

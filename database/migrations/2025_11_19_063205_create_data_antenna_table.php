@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('data_antenna', function (Blueprint $table) {
             $table->id();
+            // $table->foreignId('nama_pelanggan_id')
+            //     ->constrained('pelanggan')
+            //     ->cascadeOnDelete();
             $table->string('jenis_antenna', 50);
             $table->unsignedBigInteger('id_nama_tower');
             $table->foreign('id_nama_tower')->references('id')->on('data_tower')->onDelete('cascade')->onUpdate('cascade');

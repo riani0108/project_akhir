@@ -29,7 +29,7 @@
             <div class="success-message">
                 {{ session('success') }}
             </div>
-            @endif
+            @endif  
 
             <div class="form-group">
                 <div class="input-icon">

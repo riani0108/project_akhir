@@ -10,13 +10,18 @@ use App\Http\Controllers\HitungController;
 use App\Http\Controllers\DataTowerController;
 use App\Http\Controllers\DataAntennaController;
 use App\Http\Controllers\InputLokasiController;
+use App\Http\Controllers\InformasiController;
 use App\Models\Pelanggan;
+use Dflydev\DotAccessData\Data;
 use Illuminate\Support\Facades\Auth;
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/home', [HomeController::class, 'index'])->name('home.index');
-Route::resource('/about', App\Http\Controllers\AboutController::class);
+
+Route::resource('/about', AboutController::class);
+Route::resource('/informasi', InformasiController::class)->name('index', 'informasi');
+
 Route::middleware(['auth:pelanggan', 'verified.pelanggan'])->group(function () {
     Route::get('/hitung', [HitungController::class, 'index'])->name('hitung');
 });
@@ -33,50 +38,81 @@ Route::get('/elevation', function (Request $request) {
     return Http::timeout(10)->get($url)->json();
 });
 
+Route::get('/terrain-profile', function (Request $req) {
+    $locations = $req->query('locations');
+    $url = "https://api.opentopodata.org/v1/srtm30m?locations=$locations";
 
-Route::resource('/informasi', App\Http\Controllers\InformasiController::class)->name('index', 'informasi');
-Route::resource('/admin', App\Http\Controllers\AdminController::class);
-Route::resource('/data-tower', App\Http\Controllers\DataTowerController::class);
-Route::resource('/data-antenna', App\Http\Controllers\DataAntennaController::class);
-Route::get('/data/tower', [DataTowerController::class, 'all'])->name('data-tower.all');
-Route::get('/data/antenna', [DataAntennaController::class, 'all'])->name('data-antenna.all');
-Route::resource('input-lokasi', App\Http\Controllers\InputLokasiController::class);
-Route::get('/data/input-lokasi', [InputLokasiController::class, 'all'])->name('input-lokasi.all');
+    $response = Http::timeout(20)->get($url);
+    return $response->json();
+});
+
+// Route::resource('/informasi', App\Http\Controllers\InformasiController::class)->name('index', 'informasi');
+// Route::resource('/admin', App\Http\Controllers\AdminController::class);
+// Route::resource('/data-tower', App\Http\Controllers\DataTowerController::class);
+// Route::resource('/data-antenna', App\Http\Controllers\DataAntennaController::class);
+// Route::get('/data/tower', [DataTowerController::class, 'all'])->name('data-tower.all');
+// Route::get('/data/antenna', [DataAntennaController::class, 'all'])->name('data-antenna.all');
+// Route::resource('input-lokasi', App\Http\Controllers\InputLokasiController::class);
+// Route::get('/data/input-lokasi', [InputLokasiController::class, 'all'])->name('input-lokasi.all');
 
 
 
 Route::resource('/peta-sebaran', App\Http\Controllers\PetaSebaranController::class);
 
 
-
-
-Route::prefix('user-pelanggan')->name('user-pelanggan.')->group(function () {
-
-    // ===== AUTH =====
-    Route::get('/register', [AuthController::class, 'tampilRegister'])
-        ->name('register');
-
-    Route::post('/register/submit', [AuthController::class, 'submitRegister'])
-        ->name('register.submit');
+Route::middleware('guest:pelanggan')->group(function () {
 
     Route::get('/login', [AuthController::class, 'tampilLogin'])
-        ->name('login');
+        ->name('user-pelanggan.login');
 
-    Route::post('/login/submit', [AuthController::class, 'submitLogin'])
-        ->name('login.submit');
+    Route::post('/login', [AuthController::class, 'submitLogin'])
+        ->name('user-pelanggan.login.submit');
 
+    Route::get('/register', [AuthController::class, 'tampilRegister'])
+        ->name('user-pelanggan.register');
 
-    // ===== PROTECTED =====
-    Route::middleware('auth:pelanggan')->group(function () {
+    Route::post('/register', [AuthController::class, 'submitRegister'])
+        ->name('user-pelanggan.register.submit');
 
-        Route::post('/logout', [AuthController::class, 'logoutPelanggan'])
-            ->name('logout');
+    Route::get('/lupa-password', [AuthController::class, 'tampilLupaPassword'])
+        ->name('user-pelanggan.lupa-password');
 
-        Route::get('/dashboard', function () {
-            return view('user-pelanggan.dashboard');
-        })->name('dashboard');
-    });
+    Route::post('/lupa-password', [AuthController::class, 'kirimLinkResetPassword'])
+        ->name('user-pelanggan.lupa-password.submit');
+
+    Route::get('/reset-password/{token}', [AuthController::class, 'tampilResetPassword'])
+        ->name('user-pelanggan.reset-password');
+
+    Route::post('/reset-password', [AuthController::class, 'submitResetPassword'])
+        ->name('user-pelanggan.reset-password.submit');
 });
+
+
+Route::middleware(['auth:pelanggan', 'verified.pelanggan'])->group(function () {
+
+    Route::get('/dashboard', function () {
+        return view('user-pelanggan.dashboard');
+    })->name('dashboard');
+
+    Route::get('/hitung', [HitungController::class, 'index'])
+        ->name('hitung');
+
+    Route::resource('data-tower', DataTowerController::class);
+    Route::resource('data-antenna', DataAntennaController::class);
+
+    // Route::resource('/input-lokasi', InputLokasiController::class);
+    Route::get('/data/tower', [DataTowerController::class, 'all'])->name('data-tower.all');
+    Route::get('/data/antenna', [DataAntennaController::class, 'all'])->name('data-antenna.all');
+
+
+
+    // Route::resource('/admin', AdminController::class);
+
+    Route::post('/logout', [AuthController::class, 'logoutPelanggan'])
+        ->name('user-pelanggan.logout');
+});
+
+
 
 
 /*

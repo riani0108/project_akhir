@@ -44,7 +44,7 @@
             <button type="button" class="btn-cancel" onclick="window.location.href='/'">Cancel</button>
             <!-- Tambahan Forgot Password -->
             <p class="forgot-password-text">
-                <a href="/forgot-password" class="forgot-password-link">Lupa password?</a>
+                <a href="{{ route('user-pelanggan.lupa-password') }}" class="forgot-password-link">Lupa password?</a>
             </p>
         </form>
 

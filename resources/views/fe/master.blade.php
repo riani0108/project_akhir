@@ -77,8 +77,6 @@
                     @if(Auth::guard('pelanggan')->check())
                     <select id="pelangganActions" class="nav-select">
                         <option value="">Hi, {{ Auth::guard('pelanggan')->user()->nama_pelanggan }} ▾</option>
-                        <option value="new">New Project</option>
-                        <option value="save">Save</option>
                         <option value="logout">Logout</option>
                     </select>
                     @else
