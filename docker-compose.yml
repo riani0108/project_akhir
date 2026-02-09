@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  bts-app:
+    image: registry.smkn1cibinong.sch.id/new-devops/base-ts:${APP_VERSION}
+    container_name: base-ts-app
+    restart: unless-stopped
+
+    environment:
+      APP_NAME: Base-Transceiver-Station
+      APP_ENV: production
+      APP_KEY: ${APP_KEY}
+      APP_DEBUG: "false"
+      APP_URL: https://p2pweb.smkn1cibinong.sch.id
+
+      LOG_CHANNEL: stack
+      LOG_DEPRECATIONS_CHANNEL: null
+      LOG_LEVEL: debug
+
+      DB_CONNECTION: mysql
+      DB_HOST: 192.168.10.88
+      DB_PORT: 3306
+      DB_DATABASE: bts
+      DB_USERNAME: bts-user
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_SSL_MODE: DISABLED
+
+    volumes:
+      - app_storage:/app/storage
+      - app_cache:/app/bootstrap/cache
+      - public_data:/app/public
+
+    expose:
+      - "9000"
+
+    networks:
+      - web_net
+
+  bts-nginx:
+    image: nginx:1.25-alpine
+    container_name: base-ts-nginx
+    restart: unless-stopped
+    depends_on:
+      - bts-app
+    ports:
+      - "8080:80"
+    volumes:
+      - /home/ubuntu/base-ts/nginx:/etc/nginx/conf.d
+      - public_data:/app/public
+    networks:
+      - web_net
+
+networks:
+  web_net:
+    driver: bridge
+
+volumes:
+  app_storage:
+  app_cache:
+  public_data:
