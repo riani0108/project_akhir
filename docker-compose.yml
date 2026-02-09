@@ -45,6 +45,7 @@ services:
       - "8080:80"
     volumes:
       - /home/ubuntu/base-ts/nginx:/etc/nginx/conf.d
+      - .:/app
     networks:
       - web_net
 
