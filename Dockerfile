@@ -34,3 +34,8 @@ RUN chown -R www-data:www-data /app \
 EXPOSE 9000
 
 CMD ["php-fpm"]
+
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
