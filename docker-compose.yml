@@ -28,7 +28,7 @@ services:
     volumes:
       - app_storage:/app/storage
       - app_cache:/app/bootstrap/cache
-      - ./app:/app
+      - public_data:/app/public
 
     expose:
       - "9000"
@@ -46,7 +46,7 @@ services:
       - "8080:80"
     volumes:
       - /home/ubuntu/base-ts/nginx:/etc/nginx/conf.d
-      - ./app:/app
+      - public_data:/app/public
     networks:
       - web_net
 
