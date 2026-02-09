@@ -40,7 +40,7 @@ services:
     container_name: base-ts-nginx
     restart: unless-stopped
     depends_on:
-      - app
+      - bts-app
     ports:
       - "8080:80"
     volumes:
