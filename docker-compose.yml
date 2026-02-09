@@ -44,7 +44,7 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d:ro
     networks:
       - web_net
 
