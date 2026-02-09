@@ -57,4 +57,4 @@ networks:
 volumes:
   app_storage:
   app_cache:
-
+  public_data:
