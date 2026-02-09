@@ -43,9 +43,9 @@ services:
       - bts-app
     ports:
       - "8080:80"
-    configs:
-      - source: bts-nginx-conf
-        target: /etc/nginx/conf.d/bts.conf:ro
+  configs:
+    - source: bts-nginx-conf
+      target: /etc/nginx/conf.d/default.conf:ro
     networks:
       - web_net
 
