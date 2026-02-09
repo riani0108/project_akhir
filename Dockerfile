@@ -11,7 +11,8 @@ RUN apt-get update -y \
     zlib1g-dev \
     libzip-dev \
  && docker-php-ext-configure intl \
- && docker-php-ext-install pdo pdo_mysql mysqli intl zip
+ && docker-php-ext-install pdo pdo_mysql mysqli intl zip \
+ && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -31,11 +32,10 @@ RUN composer install \
 RUN chown -R www-data:www-data /app \
  && chmod -R 775 storage bootstrap/cache
 
-EXPOSE 9000
-
-CMD ["php-fpm"]
-
+# Copy entrypoint
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+EXPOSE 9000
 
 ENTRYPOINT ["/entrypoint.sh"]
